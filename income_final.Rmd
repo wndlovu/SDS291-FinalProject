@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 ```{r}
@@ -18,7 +19,6 @@ if (!require("ipumsr")) stop("Reading IPUMS data into R requires the ipumsr pack
 ddi <- read_ipums_ddi("usa_00007.xml")
 data <- read_ipums_micro(ddi)
 
-library(tidyverse)
 glimpse(data)
 ```
 
