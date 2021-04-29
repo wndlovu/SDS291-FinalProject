@@ -22,3 +22,10 @@ data <- read_ipums_micro(ddi)
 glimpse(data)
 ```
 
+## Explanatory Variables
+The definitions for explanatory variables for this project are derived from the IPUMS website. Our primary explanatory variable is the usual hours worked per week (UHRSWORK) if the respondent worked in 2018. To test the second hypothesis, we use the travel time to work variable (TRANTIME). TRANTIME is the approximate number of minutes it took the respondent to travel from home to work in the previous week. We control for marital status (MARST) where our main focus is on respondent who indicated that they were either married and their was spouse present or they were single and had never married. These two marital status levels are currently represented as 1 and 6 where 1 is married and 6 is single. We will change these levels to binary variables where 1 will be married and 0 single. 
+
+We have included the SEX (whether the person was male or female) and RACE variables which we might use as controls in our analysis. The RACE variable currently has all 9 levels from the IPUMS website, however we might chose to focus on specific races.
+
+
+
