@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Title 
-
+Predictors of Personal Income: Does marital status matter?
 ![](princessbride.gif)
 
 ## Purpose
