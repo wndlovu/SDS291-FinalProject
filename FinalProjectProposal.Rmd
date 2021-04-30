@@ -9,22 +9,69 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Title 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Porpuse 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+We want to look at the difference in total personal income between married and single persons with regard to number of hours worked per week and number of hours spent travelling to work. Specifically we want to answer how the number of hours worked per week can be used to predict the total personal income of married versus single persons in the United States. A secondary question we will also consider is how the number of hours spent travelling to work per week can be used to predict the total personal income of married versus single individuals. We may also be interested in looking at the relationship between hours worked per week and total time spent travelling to work for married versus single individuals. 
 
-```{r cars}
-summary(cars)
+	We hypothesize that the relationship between total personal income and hours worked per week will be different for married versus single individuals. We think that married people are more likely to work jobs that are higher paying, especially because many people wait to have financial stability before getting married. We think that single people may be more likely to work lower paying jobs and work more hours because they have fewer family obligations. 
+	
+	In terms of the second question, we hypothesize that the relationship between travel time to work and total personal income will not be different for married versus single individuals. We expect that married individuals spend more time travelling to and from work than single individuals because they may need to compromise with their spouse when it comes to the distance between their home and their job. However, we also expect that married individuals earn more than their single counterparts. We think that the relationship between travel time and total personal income will be the same for both groups, even if the intercepts are different.
+	
+	We think that looking at the relationship between hours worked per week and total time spent travelling to work for married versus single individuals could be something interesting to explore further if we have sufficient time. We expect single individuals to work longer hours than their married counterparts, but to spend less time travelling to work. We are not quite sure if the relationship will be different for married versus single individuals, and we would like to find out!
+
+
+## Data   
+
+We will be using data from the 2019 American Community Survey, which is housed on by IPUMS USA (https://usa.ipums.org/usa/). The American Community Survey is a survey that collects data about the United State’s population every year from every county in the US. The ACS collects data from housing units and group quarters. Housing units are places of living such as a house, an apartment, a mobile home, or a single room. To decide which HU (housing unit) addresses to use, the first phase of the sampling process is to assign blocks to sampling strata, calculate sampling rates, and select the sample. During the second phase of sampling the American Census Bureau selects a sample of nonresponding addresses for Computer Assisted Personal Interviewing ( The CAPI sample). To collect data from HU, the ACB begins with a mailed request to respond to the survey online, and then moves onto a mailing survey, a telephone call, or a personal visit if there is no response. Group quarters are group living arrangements owned or managed by an organization providing housing and/or services for the residents. To collect data from GQ (group quarters), U.S. Census Bureau Field Representatives interview the GQ facility contact person or the Administrator. Then, the Field Representative interviews a sample of individuals from the facility. In 2019 the sample size was 3,544,301 housing units with a nationwide response rate of 86% as well as a sample size of 167,187 people in group quarters with a response rate of 90.9%.
+
+## Population   
+
+The observational units of this survey are one person. More details about the individuals surveyed is above. We will attempt to generalize our findings to the larger US adult population (people aged 18 and above), which is approximately 200 million people. 
+
+## Outcome Variable
+
+The response variable is total personal income over the 12 months immediately prior to the date survey. The American Community Survey takes place throughout the year, and thus individuals have one of twelve possible reference periods. Total personal income is the individual’s total pre-tax personal income or losses from all sources during the reference period. Total personal income is a numeric value reported in nominal US dollars at the time of the survey, and is thus unstandardized across individuals. To resolve this, the Census Bureau does provide an adjustment factor to convert to calendar year dollars, however that does not take into account the different response periods and results in data that is “essentially perfectly correlated” with the unadjusted dollar amounts. Since this is the case, we intend to proceed with the unadjusted dollar amounts. 
+
+## Explanatory Variables
+
+The definitions for explanatory variables for this project are derived from the IPUMS website. Our primary explanatory variable is the usual hours worked per week (UHRSWORK) if the respondent worked in 2018. To test the second hypothesis, we use the travel time to work variable (TRANTIME). TRANTIME is the approximate number of minutes it took the respondent to travel from home to work in the previous week. We control for marital status (MARST) where our main focus is on respondent who indicated that they were either married and their was spouse present or they were single and had never married. These two marital status levels are currently represented as 1 and 6 where 1 is married and 6 is single. We will change these levels to binary variables where 1 will be married and 0 single. 
+
+We have included the SEX (whether the person was male or female) and RACE variables which we might use as controls in our analysis. The RACE variable currently has all 9 levels from the IPUMS website, however we might chose to focus on specific races.
+
+## Exploratory Visualizations
+###  Disturbution of varaibles   
+The following bxplots show the distribution of each variable (INCEARN, TRANTIME, UHRSWORK) for single and married individuals 18 year old and older. The income variable experiences a lot of outlieers and has higher median for married people. The travel time variable seems to be similar for both groups, while the weekly hours worked is less shows a distinctively different pattern. 
+```{r}
+ggplot(income_info, aes(x=MARST, y = INCEARN )) + 
+  geom_boxplot() + 
+  scale_x_discrete(labels=c("1" = "Married", "6" = "Single"))
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+ggplot(income_info, aes(x=MARST, y = TRANTIME )) + 
+  geom_boxplot()+ 
+  scale_x_discrete(labels=c("1" = "Married", "6" = "Single"))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+ggplot(income_info, aes(x=MARST, y = UHRSWORK )) + 
+  geom_boxplot()+ 
+  scale_x_discrete(labels=c("1" = "Married", "6" = "Single"))
+```
+
+### Relationship between varaibles 
+The income variable seem to have a positive relationship between the two variable hours worked and travel time. However There is over 1 million points so a sample of the data maybe needed as well as axis transformation. 
+```{r}
+ggplot(income_info, aes(x=UHRSWORK, y = INCEARN, color = MARST )) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+```
+
+```{r}
+ggplot(income_info, aes(x=TRANTIME, y = INCEARN, color = MARST )) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+```
+
