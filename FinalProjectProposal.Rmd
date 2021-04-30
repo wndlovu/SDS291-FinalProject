@@ -46,6 +46,15 @@ The definitions for explanatory variables for this project are derived from the 
 We have included the SEX (whether the person was male or female) and RACE variables which we might use as controls in our analysis. The RACE variable currently has all 9 levels from the IPUMS website, however we might chose to focus on specific races.
 
 ## Exploratory Visualizations
+
+```{r}
+income_info <- data %>%
+  filter(MARST == 1 | 6, 
+         INCEARN > 0, 
+         AGE >= 18) %>% 
+  mutate( MARST = as.factor(MARST))
+```
+
 ###  Disturbution of varaibles   
 The following bxplots show the distribution of each variable (INCEARN, TRANTIME, UHRSWORK) for single and married individuals 18 year old and older. The income variable experiences a lot of outlieers and has higher median for married people. The travel time variable seems to be similar for both groups, while the weekly hours worked is less shows a distinctively different pattern. 
 ```{r}
