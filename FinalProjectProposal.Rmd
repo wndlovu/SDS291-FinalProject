@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Title 
 
+![](princessbride.gif)
+
 ## Purpose
 
 We want to look at the difference in total personal income between married and single persons with regard to number of hours worked per week and number of hours spent traveling to work. Specifically we want to answer how the number of hours worked per week can be used to predict the total personal income of married versus single persons in the United States. A secondary question we will also consider is how the number of hours spent traveling to work per week can be used to predict the total personal income of married versus single individuals. We may also be interested in looking at the relationship between hours worked per week and total time spent traveling to work for married versus single individuals. 
