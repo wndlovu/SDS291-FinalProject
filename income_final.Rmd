@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+
 ```{r}
 # NOTE: To load data, you must download both the extract's data and the DDI
 # and also set the working directory to the folder with these files (or change the path below).
