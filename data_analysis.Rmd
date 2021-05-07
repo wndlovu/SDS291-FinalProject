@@ -1,0 +1,149 @@
+---
+title: "data analysis"
+author: "Rana Gahwagy"
+date: "5/7/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+if (!require("ipumsr")) stop("Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages('ipumsr')")
+
+ddi <- read_ipums_ddi("usa_00007.xml")
+data <- read_ipums_micro(ddi)
+```
+
+```{r}
+income_info <- data %>%
+  filter(MARST == 1 | 6, 
+         INCEARN > 0, 
+         AGE >= 18, 
+         RACE == c(1,2) ) %>%
+  #marries = 0 , single = 1
+  mutate(MARST = ifelse(MARST == 1,0,1))
+
+
+```
+
+```{r}
+set.seed(123)
+index <- sample(1:nrow(income_info), replace = FALSE, size= 1000)
+sample <- income_info[index, ]
+```
+
+```{r}
+m1 <- summary(lm(INCEARN ~ AGE+TRANTIME+UHRSWORK, data = sample))
+m1
+```
+
+```{r}
+m2 <- lm(INCEARN ~ AGE+TRANTIME+UHRSWORK+TRANTIME:UHRSWORK, data = sample)
+
+```
+
+```{r}
+model_dataframe <- sample %>% 
+  select(AGE,UHRSWORK, TRANTIME, INCEARN)
+
+cor(model_dataframe)
+```
+
+```{r}
+m3 <- lm(INCEARN ~ AGE+as.factor(SEX)+UHRSWORK, data = sample)
+summary(m3)
+```
+```{r}
+model_all <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = sample)
+summary(model_all)
+```
+```{r}
+income_info_races <- data %>%
+  filter(MARST == 1 | 6, 
+         INCEARN > 0, 
+         AGE >= 18) %>%
+  #marries = 0 , single = 1
+  mutate(MARST = ifelse(MARST == 1,0,1))
+
+set.seed(123)
+index <- sample(1:nrow(income_info_races), replace = FALSE, size= 1000)
+sample_races <- income_info_races[index, ]
+
+m5 <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = sample_races)
+
+summary(m5)
+
+```
+```{r}
+# to detrimne race significance 
+#all races
+m5 <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = sample_races)
+#no race 
+m6 <- lm(INCEARN ~ AGE+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = sample_races)
+
+anova(m6, m5) 
+```
+
+```{r}
+# if transit is not significant and all races
+m7 <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK, data = sample_races)
+#no race and no transit 
+m8 <- lm(INCEARN ~ AGE+as.factor(MARST)+as.factor(SEX)+UHRSWORK, data = sample_races)
+
+anova(m8, m7) # not sig => fail to reject 
+
+```
+
+```{r}
+#full
+m9<- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = sample_races)
+#redu
+m10<- lm(INCEARN ~ AGE+as.factor(SEX)+UHRSWORK, data = sample_races)
+
+anova(m10, m9) # significan => reject null 
+```
+
+```{r}
+
+summary(m9)
+```
+```{r}
+summary(lm(INCEARN ~ AGE+as.factor(SEX)+UHRSWORK+as.factor(MARST), data = sample))
+```
+
+```{r}
+ggplot(data =sample, aes(x= AGE, y = INCEARN, color=as.factor(SEX),  shape= as.factor(MARST ))) + 
+         geom_point() 
+       
+ggplot(data =sample, aes(x=UHRSWORK , y = INCEARN, color=as.factor(SEX),  shape= as.factor(MARST ))) + 
+         geom_point()
+```
+
+```{r}
+final_model <- lm(log(INCEARN) ~ AGE+ as.factor(SEX)+UHRSWORK+as.factor(MARST), data = sample)
+ggplot(data = sample, aes(fitted.values(final_model), resid(final_model))) +
+  geom_point() +
+  geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
+  labs(x = "Fitted Values",
+       y = "Residuals") +
+  ggtitle("Residual vs Fitted Plot") +
+  theme_bw()
+
+ggplot(data = final_model, aes(residuals(final_model))) + 
+  geom_histogram() +
+  stat_bin(binwidth = 1) +
+  ggtitle("Histogram of Residuals") + 
+  xlab("Residuals")
+
+ggplot(data = final_model, aes(sample = residuals(final_model))) +
+  geom_qq() +
+  geom_qq_line() +
+  labs(x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  ggtitle("Normal Q-Q Plot")
+
+
+```
+
