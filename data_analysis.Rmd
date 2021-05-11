@@ -35,6 +35,10 @@ sample <- income_info[index, ]
 ```
 
 ```{r}
+sample2 <- sample_n(income_info, 1000)
+```
+
+```{r}
 m1 <- summary(lm(INCEARN ~ AGE+TRANTIME+UHRSWORK, data = sample))
 m1
 ```
@@ -122,7 +126,7 @@ ggplot(data =sample, aes(x=UHRSWORK , y = INCEARN, color=as.factor(SEX),  shape=
 ```
 
 ```{r}
-final_model <- lm(log(INCEARN) ~ AGE+ as.factor(SEX)+UHRSWORK+as.factor(MARST), data = sample)
+final_model <- lm(log(INCEARN) ~ sqrt(AGE)+ as.factor(SEX)+sqrt(UHRSWORK)+as.factor(MARST), data = sample)
 ggplot(data = sample, aes(fitted.values(final_model), resid(final_model))) +
   geom_point() +
   geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
