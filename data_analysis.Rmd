@@ -20,12 +20,9 @@ data <- read_ipums_micro(ddi)
 income_info <- data %>%
   filter(MARST == 1 | 6, 
          INCEARN > 0, 
-         AGE >= 18, 
-         RACE == c(1,2) ) %>%
+         AGE >= 18) %>%
   #marries = 0 , single = 1
   mutate(MARST = ifelse(MARST == 1,0,1))
-
-
 ```
 
 ```{r}
@@ -97,6 +94,7 @@ m7 <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK,
 m8 <- lm(INCEARN ~ AGE+as.factor(MARST)+as.factor(SEX)+UHRSWORK, data = sample_races)
 
 anova(m8, m7) # not sig => fail to reject 
+summary(m7)
 
 ```
 
@@ -109,25 +107,65 @@ m10<- lm(INCEARN ~ AGE+as.factor(SEX)+UHRSWORK, data = sample_races)
 anova(m10, m9) # significan => reject null 
 ```
 
-```{r}
 
-summary(m9)
-```
 ```{r}
 summary(lm(INCEARN ~ AGE+as.factor(SEX)+UHRSWORK+as.factor(MARST), data = sample))
 ```
-
+#final analysis 
+#final datasample & models
 ```{r}
-ggplot(data =sample, aes(x= AGE, y = INCEARN, color=as.factor(SEX),  shape= as.factor(MARST ))) + 
+set.seed(123)
+final_sample <-  sample_n(income_info, 1000)
+final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME, data = final_sample)
+final_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+
+```
+# data summary
+```{r}
+summary(final_model_full)
+```
+```{r}
+summary(final_model)
+```
+```{r}
+summary(trans_final_model)
+```
+## visualzations 
+###scatter plots 
+```{r}
+ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color=as.factor(SEX),  shape= as.factor(MARST))) + 
          geom_point() 
        
-ggplot(data =sample, aes(x=UHRSWORK , y = INCEARN, color=as.factor(SEX),  shape= as.factor(MARST ))) + 
+ggplot(data =final_sample, aes(x=UHRSWORK , y = INCEARN, color=as.factor(SEX),  shape= as.factor(MARST ))) + 
+         geom_point()
+
+ggplot(data =final_sample, aes(x=UHRSWORK , y = INCEARN, color=as.factor(RACE),  shape= as.factor(SEX ))) + 
+         geom_point()
+
+ggplot(data =final_sample, aes(x=AGE , y = INCEARN, color=as.factor(RACE),  shape= as.factor(MARST))) + 
          geom_point()
 ```
-
+###boxplots 
 ```{r}
-final_model <- lm(log(INCEARN) ~ sqrt(AGE)+ as.factor(SEX)+sqrt(UHRSWORK)+as.factor(MARST), data = sample)
-ggplot(data = sample, aes(fitted.values(final_model), resid(final_model))) +
+ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color= as.factor(SEX))) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color= as.factor(MARST))) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color= as.factor(RACE))) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= UHRSWORK, y = INCEARN, color= as.factor(SEX))) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= UHRSWORK, y = INCEARN, color= as.factor(RACE))) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= UHRSWORK, y = INCEARN, color= as.factor(MARST))) + 
+         geom_boxplot()
+```
+
+## liner regression conditions 
+```{r}
+
+ggplot(data = final_sample, aes(fitted.values(trans_final_model), resid(trans_final_model))) +
   geom_point() +
   geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
   labs(x = "Fitted Values",
@@ -135,13 +173,13 @@ ggplot(data = sample, aes(fitted.values(final_model), resid(final_model))) +
   ggtitle("Residual vs Fitted Plot") +
   theme_bw()
 
-ggplot(data = final_model, aes(residuals(final_model))) + 
+ggplot(data = trans_final_model, aes(residuals(trans_final_model))) + 
   geom_histogram() +
   stat_bin(binwidth = 1) +
   ggtitle("Histogram of Residuals") + 
   xlab("Residuals")
 
-ggplot(data = final_model, aes(sample = residuals(final_model))) +
+ggplot(data = trans_final_model, aes(sample = residuals(trans_final_model))) +
   geom_qq() +
   geom_qq_line() +
   labs(x = "Theoretical Quantiles",
