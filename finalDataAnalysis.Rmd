@@ -1,0 +1,118 @@
+---
+title: "final data Analysis"
+author: "Rana Gahwagy"
+date: "5/14/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+if (!require("ipumsr")) stop("Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages('ipumsr')")
+
+ddi <- read_ipums_ddi("usa_00007.xml")
+data <- read_ipums_micro(ddi)
+```
+
+```{r}
+income_info <- data %>%
+  filter(MARST == 1 | 6, 
+         INCEARN > 0, 
+         AGE >= 18) %>%
+  #marries = 0 , single = 1
+  mutate(MARST = ifelse(MARST == 1,0,1))
+```
+
+#final analysis 
+#final datasample & models
+```{r}
+set.seed(123)
+final_sample <-  sample_n(income_info, 1000)
+final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME, data = final_sample)
+final_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+
+```
+# anova test
+
+```{r}
+
+#full
+m9<- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+#reduced 
+m10<- lm(log(INCEARN) ~ AGE+as.factor(SEX)+UHRSWORK, data = final_sample)
+
+anova(m10, m9) # significan => reject null 
+```
+
+# data summary
+```{r}
+summary(final_model_full)
+```
+```{r}
+summary(final_model)
+```
+```{r}
+summary(trans_final_model)
+```
+## visualzations 
+###scatter plots 
+```{r}
+ggplot(data =final_sample, aes(x= log(AGE), y = log(INCEARN), color=as.factor(SEX),  shape= as.factor(MARST))) + 
+         geom_point() 
+
+ggplot(data =final_sample, aes(x= AGE, y = log(INCEARN), color= as.factor(MARST), shape= as.factor(SEX))) + geom_point() #include 
+
+ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(MARST ))) + 
+         geom_point() + geom_smooth(method = "lm", se= F)
+```
+```{r}
+ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(SEX),  shape= as.factor(MARST ))) + 
+         geom_point()
+
+ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(RACE),  shape= as.factor(SEX ))) + 
+         geom_point()
+
+ggplot(data =final_sample, aes(x=AGE , y = log(INCEARN), color=as.factor(RACE),  shape= as.factor(MARST))) + 
+         geom_point()
+```{r}
+###boxplots 
+```{r}
+ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN)) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= as.factor(MARST), y = INCEARN, color= as.factor(MARST))) + 
+         geom_boxplot()
+ggplot(data =final_sample, aes(x= as.factor(RACE), y = INCEARN)) + 
+         geom_boxplot()
+```
+
+## liner regression conditions 
+```{r}
+
+ggplot(data = final_sample, aes(fitted.values(trans_final_model), resid(trans_final_model))) +
+  geom_point() +
+  geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
+  labs(x = "Fitted Values",
+       y = "Residuals") +
+  ggtitle("Residual vs Fitted Plot") +
+  theme_bw()
+
+ggplot(data = trans_final_model, aes(residuals(trans_final_model))) + 
+  geom_histogram() +
+  stat_bin(binwidth = 1) +
+  ggtitle("Histogram of Residuals") + 
+  xlab("Residuals")
+
+ggplot(data = trans_final_model, aes(sample = residuals(trans_final_model))) +
+  geom_qq() +
+  geom_qq_line() +
+  labs(x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  ggtitle("Normal Q-Q Plot")
+
+
+```
+
