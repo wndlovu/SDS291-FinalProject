@@ -148,17 +148,11 @@ ggplot(data =final_sample, aes(x=AGE , y = INCEARN, color=as.factor(RACE),  shap
 ```
 ###boxplots 
 ```{r}
-ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color= as.factor(SEX))) + 
+ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN)) + 
          geom_boxplot()
-ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color= as.factor(MARST))) + 
+ggplot(data =final_sample, aes(x= as.factor(MARST), y = INCEARN, color= as.factor(MARST))) + 
          geom_boxplot()
-ggplot(data =final_sample, aes(x= AGE, y = INCEARN, color= as.factor(RACE))) + 
-         geom_boxplot()
-ggplot(data =final_sample, aes(x= UHRSWORK, y = INCEARN, color= as.factor(SEX))) + 
-         geom_boxplot()
-ggplot(data =final_sample, aes(x= UHRSWORK, y = INCEARN, color= as.factor(RACE))) + 
-         geom_boxplot()
-ggplot(data =final_sample, aes(x= UHRSWORK, y = INCEARN, color= as.factor(MARST))) + 
+ggplot(data =final_sample, aes(x= as.factor(RACE), y = INCEARN)) + 
          geom_boxplot()
 ```
 
