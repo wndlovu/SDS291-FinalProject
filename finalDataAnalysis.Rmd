@@ -27,7 +27,7 @@ income_info <- data %>%
 ```
 
 #final analysis 
-#final datasample & models
+#final data sample & models
 ```{r}
 set.seed(123)
 final_sample <-  sample_n(income_info, 1000)
@@ -39,13 +39,12 @@ trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWO
 # anova test
 
 ```{r}
-
 #full
 m9<- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
 #reduced 
 m10<- lm(log(INCEARN) ~ AGE+as.factor(SEX)+UHRSWORK, data = final_sample)
 
-anova(m10, m9) # significan => reject null 
+anova(m10, m9) # not significant => fail to reject null => RACE is not helpful in this model
 ```
 
 # data summary

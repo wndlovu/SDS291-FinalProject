@@ -61,7 +61,7 @@ model_all <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UH
 summary(model_all)
 ```
 ```{r}
-income_info_races <- data %>%
+income_info_white <- data %>%
   filter(MARST == 1 | 6, 
          INCEARN > 0, 
          AGE >= 18) %>%
@@ -69,16 +69,34 @@ income_info_races <- data %>%
   mutate(MARST = ifelse(MARST == 1,0,1))
 
 set.seed(123)
-index <- sample(1:nrow(income_info_races), replace = FALSE, size= 1000)
-sample_races <- income_info_races[index, ]
+white_vs_other <- sample_n(income_info_white, 1000)
 
-m5 <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = sample_races)
+white_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = white_vs_other)
 
-summary(m5)
+summary(white_model)
+
+```
+
+```{r}
+income_info_white <- data %>%
+  filter(MARST == 1 | 6, 
+         INCEARN > 0, 
+         AGE >= 18) %>%
+  #marries = 0 , single = 1
+  mutate(MARST = ifelse(MARST == 1,0,1), 
+         #0 = white , 1= non-white
+         RACE = ifelse(RACE == 1,0,1))
+
+set.seed(123)
+white_vs_other <- sample_n(income_info_white, 1000)
+
+white_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK, data = white_vs_other)
+
+summary(white_model)
 
 ```
 ```{r}
-# to detrimne race significance 
+# to determine race significance 
 #all races
 m5 <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(MARST)+as.factor(SEX)+UHRSWORK+TRANTIME, data = sample_races)
 #no race 
