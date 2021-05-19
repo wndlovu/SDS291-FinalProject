@@ -31,9 +31,9 @@ income_info <- data %>%
 ```{r}
 set.seed(123)
 final_sample <-  sample_n(income_info, 1000)
-final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME, data = final_sample)
-final_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
-trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME+(MARST), data = final_sample)
+final_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+(MARST), data = final_sample)
+trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+(MARST), data = final_sample)
 
 ```
 # anova test
@@ -77,7 +77,7 @@ ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(RA
 
 ggplot(data =final_sample, aes(x=AGE , y = log(INCEARN), color=as.factor(RACE),  shape= as.factor(MARST))) + 
          geom_point()
-```{r}
+```
 ###boxplots 
 ```{r}
 ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN)) + 
