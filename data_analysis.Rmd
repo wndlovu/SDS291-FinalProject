@@ -141,7 +141,7 @@ trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWO
 ```
 # data summary
 ```{r}
-summary(final_model_full)
+summary(trans_final_model)
 ```
 ```{r}
 summary(final_model)

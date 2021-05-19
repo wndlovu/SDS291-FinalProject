@@ -8,9 +8,18 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
+library(patchwork)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+library(scales)
+```
+
+```{r}
 if (!require("ipumsr")) stop("Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages('ipumsr')")
 
 ddi <- read_ipums_ddi("usa_00007.xml")
@@ -22,7 +31,7 @@ income_info <- data %>%
   filter(MARST == 1 | 6, 
          INCEARN > 0, 
          AGE >= 18) %>%
-  #marries = 0 , single = 1
+  #married = 0 , single = 1
   mutate(MARST = ifelse(MARST == 1,0,1))
 ```
 
@@ -57,6 +66,13 @@ summary(final_model)
 ```{r}
 summary(trans_final_model)
 ```
+
+#summary table
+```{r}
+tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per
+week"))
+```
+
 ## visualzations 
 ###scatter plots 
 ```{r}
@@ -77,16 +93,25 @@ ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(RA
 
 ggplot(data =final_sample, aes(x=AGE , y = log(INCEARN), color=as.factor(RACE),  shape= as.factor(MARST))) + 
          geom_point()
-```{r}
+```
+
 ###boxplots 
 ```{r}
-ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN)) + 
-         geom_boxplot()
-ggplot(data =final_sample, aes(x= as.factor(MARST), y = INCEARN, color= as.factor(MARST))) + 
-         geom_boxplot()
-ggplot(data =final_sample, aes(x= as.factor(RACE), y = INCEARN)) + 
-         geom_boxplot()
+x1 <- ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN, color=as.factor(MARST) )) + 
+         geom_boxplot() + theme_bw() +
+  labs(title="Sex vs Income", x ="Sex", y = "Income (Dollars)") +
+  scale_x_discrete(labels=c("1" = "Male", "2" = "Female")) +
+  scale_color_discrete(name = "Marital Status", labels = c("Married", "Never Married/Single")) +
+  scale_y_continuous(labels = dollar) + theme(legend.position="bottom")
+
+x2 <- ggplot(data =final_sample, aes(x= as.factor(RACE), y = INCEARN)) + 
+         geom_boxplot()+ theme_bw() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2), labels = c("1" = "White", "2" = "Black", "3" = "Native", "4" ="Chinese","5" = "Japanese","6"= "Pacific Islander", "7"="Other","8"= "Two major", "9"="Three or more"))+
+  labs(title="Race vs Income ", x ="Race", y = "Income (Dollars)") +
+  scale_y_continuous(labels = dollar)
+x1+x2
 ```
+
 
 ## liner regression conditions 
 ```{r}
@@ -103,15 +128,13 @@ ggplot(data = trans_final_model, aes(residuals(trans_final_model))) +
   geom_histogram() +
   stat_bin(binwidth = 1) +
   ggtitle("Histogram of Residuals") + 
-  xlab("Residuals")
+  xlab("Residuals") + theme_bw()
 
 ggplot(data = trans_final_model, aes(sample = residuals(trans_final_model))) +
   geom_qq() +
   geom_qq_line() +
   labs(x = "Theoretical Quantiles",
        y = "Sample Quantiles") +
-  ggtitle("Normal Q-Q Plot")
-
-
+  ggtitle("Normal Q-Q Plot") + theme_bw()
 ```
 
