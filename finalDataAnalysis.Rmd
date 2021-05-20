@@ -1,12 +1,12 @@
 ---
-title: "final data Analysis"
-author: "Rana Gahwagy"
-date: "5/14/2021"
+title: "Predictors of Personal Income"
+author: "Rana Gahwagy, Irene Foster, Anne Lepow, Wayne Ndlovu"
+date: "5/20/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 library(tidyverse)
 library(dplyr)
@@ -19,6 +19,7 @@ library(scales)
 ```
 
 ```{r}
+# loading data into R
 if (!require("ipumsr")) stop("Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages('ipumsr')")
 
 ddi <- read_ipums_ddi("usa_00007.xml")
@@ -26,6 +27,7 @@ data <- read_ipums_micro(ddi)
 ```
 
 ```{r}
+# data wrangling
 income_info <- data %>%
   filter(MARST == 1 | 6, 
          INCEARN > 0, 
@@ -34,9 +36,8 @@ income_info <- data %>%
   mutate(MARST = ifelse(MARST == 1,0,1))
 ```
 
-#final analysis 
-#final data sample & models
 ```{r}
+# gets data sample and sets models
 set.seed(123)
 final_sample <-  sample_n(income_info, 1000)
 final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME+as.factor(MARST ), data = final_sample)
@@ -46,37 +47,37 @@ trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWO
 ```
 
 
-# anova test for race
-
 ```{r}
-#full
+# anova test for race
+#full model
 m9<- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+as.factor(MARST ), data = final_sample)
-#reduced 
+#reduced model
 m10<- lm(log(INCEARN) ~ AGE+as.factor(SEX)+UHRSWORK+as.factor(MARST ), data = final_sample)
 
 anova_test <- anova(m10, m9) # not significant => fail to reject null => RACE is not helpful in this model
 anova_test
 ```
 
-# data summary
-```{r}
+```{r, echo=FALSE, include=FALSE}
+# Final Model Summary
 summary(final_model_full)
 ```
-```{r}
+```{r, echo=FALSE, include=FALSE}
 summary(final_model)
 ```
-```{r}
+```{r, echo=FALSE, include=FALSE}
 summary(trans_final_model)
 ```
 
-#summary table
 ```{r}
-tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per week", "Single"), title = "Table 1. Model output")
+# summary table
+tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per week", "Single"), title = "Table 1. Model output") 
+
 ```
 
-## visualzations 
-###scatter plots 
+
 ```{r}
+# scatter plots
 z1 <- ggplot(data =final_sample, aes(x=AGE , y = log(INCEARN), color=as.factor(SEX))) + 
          geom_point() + geom_smooth(method = "lm", se= F)+ theme_bw() +
   labs(title="Age vs Income", x ="Age (years)", y = "Log of Income (Dollars)") +
@@ -90,15 +91,15 @@ z2 <- ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.fac
   scale_y_continuous(labels = dollar) + theme(legend.position="bottom") + labs(tag = "b")+
     theme(plot.tag.position = "topright")
 
-z1+z2 +labs(tag = "Fig 2. Log income relationship with (a) age by sex  and (b) horse worked by material status race") +
+z1+z2 +labs(tag = "Fig 3. Log income relationship with (a) age by sex  and (b) hours worked by marital status race") +
     coord_cartesian(clip = "off") +
     theme(plot.margin = margin(t = 10, r = 10, b = 40, l = 10),
           plot.tag.position = c(0.2, -0.1))
 ```
 
 
-###boxplots 
 ```{r}
+# boxplots
 x1 <- ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN, color=as.factor(MARST) )) + 
          geom_boxplot() + theme_bw() +
   labs(title="Sex vs Income", x ="Binary Sex", y = "Income (Dollars)") +
@@ -113,16 +114,15 @@ x2 <- ggplot(data =final_sample, aes(x= as.factor(RACE), y = INCEARN)) +
   scale_y_continuous(labels = dollar)+ labs(tag = "b") +
     theme(plot.tag.position = "topright")
 
-x1+x2 +labs(tag = "Fig 1. Income disturbution of sample data by (a) sex with regard to material status and (b) race") +
+x1+x2 +labs(tag = "Fig 2. Income disturbution of sample data by (a) sex with regard to marital status and (b) race") +
     coord_cartesian(clip = "off") +
     theme(plot.margin = margin(t = 10, r = 10, b = 40, l = 10),
           plot.tag.position = c(0.2, -0.1))
 ```
 
 
-## liner regression conditions 
 ```{r}
-
+# linear regression condition tests
 y1 <- ggplot(data = final_sample, aes(fitted.values(trans_final_model), resid(trans_final_model))) +
   geom_point() +
   geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
@@ -144,7 +144,7 @@ y3 <- ggplot(data = trans_final_model, aes(sample = residuals(trans_final_model)
        y = "Sample Quantiles") +
   ggtitle("Normal Q-Q Plot") + theme_bw()
 
-y1+y2+labs(tag = "Fig 3. Testing the linerty of the model") +
+y1+y2+labs(tag = "Fig 1. Testing the linearity of the model") +
     coord_cartesian(clip = "off") +
     theme(plot.margin = margin(t = 10, r = 10, b = 40, l = 10),
           plot.tag.position = c(0.2, -0.1)) +y3 
