@@ -2,7 +2,9 @@
 title: "Predictors of Personal Income"
 author: "Rana Gahwagy, Irene Foster, Anne Lepow, Wayne Ndlovu"
 date: "5/20/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +18,7 @@ library(sjPlot)
 library(sjmisc)
 library(sjlabelled)
 library(scales)
+library(rstatix)
 ```
 
 ```{r}
@@ -47,6 +50,7 @@ trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWO
 
 ## Abstract 
 The goal for our project is to explore the relationship between the number of hours worked per week and total personal income between married and single people. We also wanted to explore the relationship between time travelling to work and total personal income between married and single people. To test our hypotheses, we created a linear regression model using data from the American Community Survey. The variables in our model were total personal income, hours worked per week, transit time, and marital status as well as other variables we decided to adjust for such as sex, age, and race. From our model, we were able to conclude that hours worked per week is statistically significant in predicting total personal income after controlling for age, binary sex, marital status and race. However,  we found that transit time was not statistically significant in predicting total personal income after controlling for age, binary sex, marital status and race.
+\newpage
 
 ## Introduction 
 
@@ -146,6 +150,7 @@ z1+z2 +labs(tag = "Fig 3. Log income relationship with (a) age by sex  and (b) h
 
 In order to understand the various factors that contribute to personal income, a multiple regression model was created which is (INSERT fancy model). The log transformation was incorporated in order to meet the liberty assumptions. An ANOVA test was conducted to choose which variable to include in the model. We found no evidence that transportation time is associated with log income so it does not contribute significantly to the model (p-value = 0.08), therefore, it was not included in the model. We conducted an ANOVA test for the race indicator variables on the untransformed data as well as the transformed data. Although race was found to be not significant after the log transformation, it was included as a controlling factor since it was found to be significant before the log transformation.   
 
+Table 1.a ANOVA test in order to test if the race variable helpful for the log transformed model 
 ```{r}
 # anova test for race with log transformation
 #full model
@@ -157,6 +162,7 @@ anova_test <- anova(m10, m9) # not significant => fail to reject null => RACE is
 anova_test
 ```
 
+Table 1.b ANOVA test in order to test if the race variable helpful for the untransformed model 
 ```{r}
 # anova test for race without log transformation
 #all races
@@ -170,7 +176,15 @@ The summary of the result is presented in Table 1 in detail. Based on the t-test
 
 ```{r}
 # summary table
-tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per week", "Single"), title = "Table 1. Model output") 
+table <- tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per week", "Single"), title = "Table 1. Model output") 
+```
+Table 2. Model output 
+```{r}
+summary(trans_final_model)
+```
+```{r, eval=FALSE}
+#pvalue of Transportation time
+summary(final_model_full)
 ```
 
 ## Discussion:
