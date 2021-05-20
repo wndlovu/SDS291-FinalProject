@@ -39,18 +39,18 @@ income_info <- data %>%
 ```{r}
 set.seed(123)
 final_sample <-  sample_n(income_info, 1000)
-final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME, data = final_sample)
-final_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
-trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+final_model_full <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+TRANTIME+as.factor(MARST ), data = final_sample)
+final_model <- lm(INCEARN ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+as.factor(MARST ), data = final_sample)
+trans_final_model <- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+as.factor(MARST ), data = final_sample)
 
 ```
 # anova test
 
 ```{r}
 #full
-m9<- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final_sample)
+m9<- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK+as.factor(MARST ), data = final_sample)
 #reduced 
-m10<- lm(log(INCEARN) ~ AGE+as.factor(SEX)+UHRSWORK, data = final_sample)
+m10<- lm(log(INCEARN) ~ AGE+as.factor(SEX)+UHRSWORK+as.factor(MARST ), data = final_sample)
 
 anova_test <- anova(m10, m9) # not significant => fail to reject null => RACE is not helpful in this model
 anova_test
@@ -69,8 +69,7 @@ summary(trans_final_model)
 
 #summary table
 ```{r}
-tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per
-week"), title = "Table 1. Model output")
+tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per week", "Marital Status"), title = "Table 1. Model output")
 ```
 
 ## visualzations 
