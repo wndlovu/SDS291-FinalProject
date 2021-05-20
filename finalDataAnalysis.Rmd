@@ -52,7 +52,8 @@ m9<- lm(log(INCEARN) ~ AGE+as.factor(RACE)+as.factor(SEX)+UHRSWORK, data = final
 #reduced 
 m10<- lm(log(INCEARN) ~ AGE+as.factor(SEX)+UHRSWORK, data = final_sample)
 
-anova(m10, m9) # not significant => fail to reject null => RACE is not helpful in this model
+anova_test <- anova(m10, m9) # not significant => fail to reject null => RACE is not helpful in this model
+anova_test
 ```
 
 # data summary
@@ -69,53 +70,59 @@ summary(trans_final_model)
 #summary table
 ```{r}
 tab_model(trans_final_model, pred.labels = c("Intercept", "Age", "Black/African American", "American Indian or Alaska Native", "Chinese", "Japanese", "Other Asian or Pacific Islander", "Other race", "Two major races", "Three or more major races", "Female", "Usual hours worked per
-week"))
+week"), title = "Table 1. Model output")
 ```
 
 ## visualzations 
 ###scatter plots 
 ```{r}
-ggplot(data =final_sample, aes(x= log(AGE), y = log(INCEARN), color=as.factor(SEX),  shape= as.factor(MARST))) + 
-         geom_point() 
+z1 <- ggplot(data =final_sample, aes(x=AGE , y = log(INCEARN), color=as.factor(SEX))) + 
+         geom_point() + geom_smooth(method = "lm", se= F)+ theme_bw() +
+  labs(title="Age vs Income", x ="Age (years)", y = "Log of Income (Dollars)") +
+  scale_color_discrete(name = "Binary Sex",labels=c("1" = "Male", "2" = "Female")) +
+  scale_y_continuous(labels = dollar) + theme(legend.position="bottom") + labs(tag = "a")
 
-ggplot(data =final_sample, aes(x= AGE, y = log(INCEARN), color= as.factor(MARST), shape= as.factor(SEX))) + geom_point() #include 
+z2 <- ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(MARST ))) + 
+         geom_point() + geom_smooth(method = "lm", se= F)+ theme_bw() +
+  labs(title="Hours Worked vs Income", x ="Hours Worked", y = "Log of Income (Dollars)") +
+  scale_color_discrete(name = "Marital Status", labels = c("Married", "Never Married")) +
+  scale_y_continuous(labels = dollar) + theme(legend.position="bottom") + labs(tag = "b")+
+    theme(plot.tag.position = "topright")
 
-ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(MARST ))) + 
-         geom_point() + geom_smooth(method = "lm", se= F)
+z1+z2 +labs(tag = "Fig 2. Log income relationship with (a) age by sex  and (b) horse worked by material status race") +
+    coord_cartesian(clip = "off") +
+    theme(plot.margin = margin(t = 10, r = 10, b = 40, l = 10),
+          plot.tag.position = c(0.2, -0.1))
 ```
-```{r}
-ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(SEX),  shape= as.factor(MARST ))) + 
-         geom_point()
 
-ggplot(data =final_sample, aes(x=UHRSWORK , y = log(INCEARN), color=as.factor(RACE),  shape= as.factor(SEX ))) + 
-         geom_point()
-
-ggplot(data =final_sample, aes(x=AGE , y = log(INCEARN), color=as.factor(RACE),  shape= as.factor(MARST))) + 
-         geom_point()
-```
 
 ###boxplots 
 ```{r}
 x1 <- ggplot(data =final_sample, aes(x= as.factor(SEX), y = INCEARN, color=as.factor(MARST) )) + 
          geom_boxplot() + theme_bw() +
-  labs(title="Sex vs Income", x ="Sex", y = "Income (Dollars)") +
+  labs(title="Sex vs Income", x ="Binary Sex", y = "Income (Dollars)") +
   scale_x_discrete(labels=c("1" = "Male", "2" = "Female")) +
-  scale_color_discrete(name = "Marital Status", labels = c("Married", "Never Married/Single")) +
-  scale_y_continuous(labels = dollar) + theme(legend.position="bottom")
+  scale_color_discrete(name = "Marital Status", labels = c("Married", "Never Married")) +
+  scale_y_continuous(labels = dollar) + theme(legend.position="bottom") + labs(tag = "a")
 
 x2 <- ggplot(data =final_sample, aes(x= as.factor(RACE), y = INCEARN)) + 
          geom_boxplot()+ theme_bw() +
-  scale_x_discrete(guide = guide_axis(n.dodge = 2), labels = c("1" = "White", "2" = "Black", "3" = "Native", "4" ="Chinese","5" = "Japanese","6"= "Pacific Islander", "7"="Other","8"= "Two major", "9"="Three or more"))+
+  scale_x_discrete(guide = guide_axis(n.dodge = 2), labels = c("1" = "White", "2" = "Black", "3" = "Native", "4" ="Chinese","5" = "Japanese","6"= "Pacific Islander", "7"="Other","8"= "Tow Major", "9"="3+"))+
   labs(title="Race vs Income ", x ="Race", y = "Income (Dollars)") +
-  scale_y_continuous(labels = dollar)
-x1+x2
+  scale_y_continuous(labels = dollar)+ labs(tag = "b") +
+    theme(plot.tag.position = "topright")
+
+x1+x2 +labs(tag = "Fig 1. Income disturbution of sample data by (a) sex with regard to material status and (b) race") +
+    coord_cartesian(clip = "off") +
+    theme(plot.margin = margin(t = 10, r = 10, b = 40, l = 10),
+          plot.tag.position = c(0.2, -0.1))
 ```
 
 
 ## liner regression conditions 
 ```{r}
 
-ggplot(data = final_sample, aes(fitted.values(trans_final_model), resid(trans_final_model))) +
+y1 <- ggplot(data = final_sample, aes(fitted.values(trans_final_model), resid(trans_final_model))) +
   geom_point() +
   geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
   labs(x = "Fitted Values",
@@ -123,17 +130,22 @@ ggplot(data = final_sample, aes(fitted.values(trans_final_model), resid(trans_fi
   ggtitle("Residual vs Fitted Plot") +
   theme_bw()
 
-ggplot(data = trans_final_model, aes(residuals(trans_final_model))) + 
+y2 <- ggplot(data = trans_final_model, aes(residuals(trans_final_model))) + 
   geom_histogram() +
   stat_bin(binwidth = 1) +
   ggtitle("Histogram of Residuals") + 
   xlab("Residuals") + theme_bw()
 
-ggplot(data = trans_final_model, aes(sample = residuals(trans_final_model))) +
+y3 <- ggplot(data = trans_final_model, aes(sample = residuals(trans_final_model))) +
   geom_qq() +
   geom_qq_line() +
   labs(x = "Theoretical Quantiles",
        y = "Sample Quantiles") +
   ggtitle("Normal Q-Q Plot") + theme_bw()
+
+y1+y2+labs(tag = "Fig 3. Testing the linerty of the model") +
+    coord_cartesian(clip = "off") +
+    theme(plot.margin = margin(t = 10, r = 10, b = 40, l = 10),
+          plot.tag.position = c(0.2, -0.1)) +y3 
 ```
 
