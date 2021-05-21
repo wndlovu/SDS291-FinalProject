@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE,  comment=FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 
 library(tidyverse)
 library(dplyr)
@@ -22,8 +22,6 @@ library(rstatix)
 ```
 
 ```{r}
-# loading data into R
-if (!require("ipumsr")) stop("Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages('ipumsr')")
 
 ddi <- read_ipums_ddi("usa_00007.xml") 
 data <- read_ipums_micro(ddi)
